@@ -24,12 +24,13 @@ cc.Class({
             type: cc.Node
         },
         //move
-        playerJumpTime: 0.5,
+        playerJumpTime: 0.05,
+        jumpSameSideHeight: 50,
         playerLeft: -230,
         playerRight: 230,
         playerHeight: 260,
         touchSide: 0,
-        bFlip: false,
+        bMoveToOtherSide: false,
         bMoving: false,
         moveAction: null,
         //score
@@ -40,11 +41,11 @@ cc.Class({
     onLoad: function () {
         console.log("load*****************************");
         let self = this;
-        self.playerJumpTime = 0.5;
+        self.playerJumpTime = 0.05;
         self.playerLeft = -230;
         self.playerRight = 230;
         self.playerHeight = 260;
-        self.bFlip = false;
+        self.bMoveToOtherSide = false;
         self.bMoving = false;
         self.node.once('touchstart', self.onTouch, self);
     },
@@ -74,8 +75,8 @@ cc.Class({
         console.log("playerSide:", playerSide);
         console.log("touchSide:", self.touchSide);
 
-        self.bFlip = (self.touchSide > 0);
-        console.log("flip:", self.bFlip);
+        self.bMoveToOtherSide = (playerSide <= 0 && self.touchSide > 0) || (playerSide > 0 && self.touchSide <= 0);
+        console.log("bMoveToOtherSide:", self.bMoveToOtherSide);
         self.moveAction = self.playerMove(self.controlPlayer, self.touchSide);
         console.log("moveAction", self.moveAction);
         self.bMoving = true;
@@ -85,10 +86,16 @@ cc.Class({
         let self = this;
         let move;
         let moveDirection = touchSide > 0 ? 1 : -1;
-        console.log("realflip",self.bFlip);
-        move = cc.sequence( cc.moveTo(self.playerJumpTime, cc.p(self.playerRight * moveDirection, self.playerHeight)).easing(cc.easeInOut(3.0)), cc.flipX(self.bFlip));
+        let bFlip = touchSide > 0 ? true : false;
+        console.log("realbMoveToOtherSide",self.bMoveToOtherSide);
+        if (self.bMoveToOtherSide)
+            move = cc.moveTo(self.playerJumpTime, cc.p(self.playerRight * moveDirection, self.playerHeight)).easing(cc.easeInOut(3.0));
+        else
+            move = cc.sequence(cc.moveTo(self.playerJumpTime, cc.p((self.playerRight - self.jumpSameSideHeight) * moveDirection, self.playerHeight)).easing(cc.easeOut(3.0)), 
+                    cc.moveTo(self.playerJumpTime, cc.p(self.playerRight * moveDirection, self.playerHeight)).easing(cc.easeIn(3.0)));
+        let finalMove = cc.sequence(cc.flipX(bFlip), move);
 
-        return player.node.runAction(move);
+        return player.node.runAction(finalMove);
     },
 
 });

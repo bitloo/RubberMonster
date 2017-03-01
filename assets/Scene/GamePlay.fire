@@ -273,6 +273,7 @@
     },
     "_enabled": true,
     "isAlignOnce": true,
+    "_target": null,
     "_alignFlags": 9,
     "_left": 0.10000000000000014,
     "_right": 0,
@@ -376,6 +377,7 @@
     },
     "_enabled": true,
     "isAlignOnce": true,
+    "_target": null,
     "_alignFlags": 33,
     "_left": 0,
     "_right": 0.15,
@@ -521,13 +523,13 @@
     "scoreCount": {
       "__id__": 8
     },
-    "playerJumpTime": 0.2,
+    "playerJumpTime": 0.1,
     "playerLeft": -230,
     "playerRight": 230,
     "playerHeight": 260,
     "touchSide": 0,
     "bFlip": false,
-    "bMoveDone": true,
+    "bMoving": false,
     "moveAction": null,
     "score": 0
   }

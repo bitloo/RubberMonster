@@ -16,7 +16,7 @@ cc.Class({
 
     // use this for initialization
     onLoad: function () {
-        this.node.on('mousedown', function() {
+        this.node.on('touchend', function() {
             cc.director.loadScene('GamePlay');
         });
     },
