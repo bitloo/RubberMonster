@@ -23,9 +23,14 @@ cc.Class({
             default: null,
             type: cc.Node
         },
+
+        jumpMusicSource: {
+            default: null,
+            type: cc.AudioSource    
+        },
         //move
-        playerJumpTime: 0.05,
-        jumpSameSideHeight: 50,
+        playerJumpTime: 0.02,
+        jumpSameSideHeight: 100,
         playerLeft: -230,
         playerRight: 230,
         playerHeight: 260,
@@ -41,7 +46,7 @@ cc.Class({
     onLoad: function () {
         console.log("load*****************************");
         let self = this;
-        self.playerJumpTime = 0.05;
+        self.playerJumpTime = 0.02;
         self.playerLeft = -230;
         self.playerRight = 230;
         self.playerHeight = 260;
@@ -93,9 +98,15 @@ cc.Class({
         else
             move = cc.sequence(cc.moveTo(self.playerJumpTime, cc.p((self.playerRight - self.jumpSameSideHeight) * moveDirection, self.playerHeight)).easing(cc.easeOut(3.0)), 
                     cc.moveTo(self.playerJumpTime, cc.p(self.playerRight * moveDirection, self.playerHeight)).easing(cc.easeIn(3.0)));
-        let finalMove = cc.sequence(cc.flipX(bFlip), move);
+        let jumpMscCallBack = cc.callFunc(self.playJumpAudio, self);
+        let finalMove = cc.sequence(cc.flipX(bFlip), move, jumpMscCallBack);
 
         return player.node.runAction(finalMove);
     },
+
+    playJumpAudio: function() {
+        let self = this;
+        self.jumpMusicSource.play();
+    }
 
 });

@@ -10,7 +10,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "dici ",
+    "_name": "Spt_Thorn",
     "_objFlags": 0,
     "_opacity": 255,
     "_color": {
@@ -39,8 +39,8 @@
     "_scaleY": 1,
     "_position": {
       "__type__": "cc.Vec2",
-      "x": 227,
-      "y": -29
+      "x": 240,
+      "y": 150
     },
     "_skewX": 0,
     "_skewY": 0,
@@ -53,13 +53,10 @@
     "_components": [
       {
         "__id__": 2
-      },
-      {
-        "__id__": 3
       }
     ],
     "_prefab": {
-      "__id__": 4
+      "__id__": 3
     },
     "groupIndex": 0
   },
@@ -90,25 +87,14 @@
     "_atlas": null
   },
   {
-    "__type__": "e6b1b1NZFpDi5WBW+obYLxB",
-    "_name": "",
-    "_objFlags": 0,
-    "node": {
-      "__id__": 1
-    },
-    "_enabled": true,
-    "dieAudio": {
-      "__uuid__": "b2fe4ea5-9aad-45d9-a327-4c3fb0c8b99d"
-    }
-  },
-  {
     "__type__": "cc.PrefabInfo",
     "root": {
       "__id__": 1
     },
     "asset": {
-      "__uuid__": "5003a106-f863-4bcc-8caf-5ef133fa77ea"
+      "__id__": 0
     },
-    "fileId": "37b80wWwAVALpPj5I8qmmLl"
+    "fileId": "d9177sGdJ5OqJu6CVrDF8e4",
+    "sync": false
   }
 ]
