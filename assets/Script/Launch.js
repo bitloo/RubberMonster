@@ -12,23 +12,11 @@ cc.Class({
         //    readonly: false,    // optional, default is false
         // },
         // ...
-        scaleFactor: 1.2,
-        zoomInDuration: 0.8,
-        zoomOutDuration: 1,
     },
 
     // use this for initialization
     onLoad: function () {
-        let self = this;
-        self.node.on('touchend', function() {
-            cc.director.loadScene('GamePlay');
-        });
-
-        let startBtnScale = cc.sequence(
-            cc.scaleBy(self.zoomInDuration, self.scaleFactor, self.scaleFactor), 
-            cc.scaleBy(self.zoomOutDuration, 1 / self.scaleFactor, 1 / self.scaleFactor)
-        )  
-        self.node.runAction(cc.repeatForever(startBtnScale));
+        cc.view.setDesignResolutionSize(640, 960, cc.ResolutionPolicy.EXACT_FIT);
     },
 
     // called every frame, uncomment this function to activate update callback

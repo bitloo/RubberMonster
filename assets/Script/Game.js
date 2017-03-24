@@ -28,6 +28,11 @@ cc.Class({
             default: null,
             type: cc.AudioSource    
         },
+
+        ThronPrefab: {
+            default: null,
+            type: cc.Prefab
+        },
         //move
         playerJumpTime: 0.02,
         jumpSameSideHeight: 100,
@@ -46,12 +51,8 @@ cc.Class({
     onLoad: function () {
         console.log("load*****************************");
         let self = this;
-        self.playerJumpTime = 0.02;
-        self.playerLeft = -230;
-        self.playerRight = 230;
-        self.playerHeight = 260;
-        self.bMoveToOtherSide = false;
-        self.bMoving = false;
+
+        cc.view.setDesignResolutionSize(640, 960, cc.ResolutionPolicy.EXACT_FIT);
         self.node.once('touchstart', self.onTouch, self);
     },
 
@@ -96,10 +97,10 @@ cc.Class({
         if (self.bMoveToOtherSide)
             move = cc.moveTo(self.playerJumpTime, cc.p(self.playerRight * moveDirection, self.playerHeight)).easing(cc.easeInOut(3.0));
         else
-            move = cc.sequence(cc.moveTo(self.playerJumpTime, cc.p((self.playerRight - self.jumpSameSideHeight) * moveDirection, self.playerHeight)).easing(cc.easeOut(3.0)), 
+            move = cc.spawn(cc.moveTo(self.playerJumpTime, cc.p((self.playerRight - self.jumpSameSideHeight) * moveDirection, self.playerHeight)).easing(cc.easeOut(3.0)), 
                     cc.moveTo(self.playerJumpTime, cc.p(self.playerRight * moveDirection, self.playerHeight)).easing(cc.easeIn(3.0)));
         let jumpMscCallBack = cc.callFunc(self.playJumpAudio, self);
-        let finalMove = cc.sequence(cc.flipX(bFlip), move, jumpMscCallBack);
+        let finalMove = cc.spawn(jumpMscCallBack, cc.flipX(bFlip), move);
 
         return player.node.runAction(finalMove);
     },

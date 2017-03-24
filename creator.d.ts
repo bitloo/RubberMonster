@@ -1043,9 +1043,6 @@ declare module cc {
 	!#zh cc.winSize 为当前的游戏窗口的大小。 */
 	export var winSize : Size;	
 	export var game : Game;	
-	/** Checks whether subclass is child of superclass or equals to superclass 
-	*/
-	export function isChildClassOf(subclass : Function, superclass : Function) : boolean;	
 	/** !#en Defines a CCClass using the given specification, please see [Class](/en/scripting/class/) for details.
 	!#zh 定义一个 CCClass，传入参数必须是一个包含类型参数的字面量对象，具体用法请查阅[类型定义](/zh/scripting/class/)。
 	
@@ -1097,6 +1094,9 @@ declare module cc {
 	``` 
 	*/
 	export function Class(options : { name?; extends?; ctor?; properties?; statics?; mixins?; editor? : { requireComponent? : Component; disallowMultiple? : Component; menu? : string; executeInEditMode? : boolean; playOnFocus? : boolean; inspector? : string; icon? : string; help? : string; } ; update?; lateUpdate?; onLoad?; start?; onEnable?; onDisable?; onDestroy?; onFocusInEditor?; onLostFocusInEditor?; resetInEditor?; onRestore?; _getLocalBounds?; }) : Function;	
+	/** Checks whether subclass is child of superclass or equals to superclass 
+	*/
+	export function isChildClassOf(subclass : Function, superclass : Function) : boolean;	
 	/** Return all super classes 
 	*/
 	export function getInheritanceChain(constructor : Function) : Function[];	
@@ -1106,6 +1106,53 @@ declare module cc {
 	/** set accelerometer interval value 
 	*/
 	export function setAccelerometerInterval(interval : number) : void;	
+	/** default gl blend src function. Compatible with premultiplied alpha images. */
+	export var BLEND_SRC : number;	
+	/** <p>
+	    Linear interpolation between 2 numbers, the ratio sets how much it is biased to each end
+	</p>
+	@param a number A
+	@param b number B
+	@param r ratio between 0 and 1
+	
+	@example 
+	```js
+	----
+	lerp
+	cc.lerp(2,10,0.5)//returns 6
+	cc.lerp(2,10,0.2)//returns 3.6
+	
+	``` 
+	*/
+	export function lerp(a : number, b : number, r : number) : void;	
+	/** get a random number from 0 to 0xffffff 
+	*/
+	export function rand() : number;	
+	/** returns a random float between -1 and 1 
+	*/
+	export function randomMinus1To1() : number;	
+	/** returns a random float between 0 and 1, use Math.random directly 
+	*/
+	export function random0To1() : number;	
+	/** converts degrees to radians 
+	*/
+	export function degreesToRadians(angle : number) : number;	
+	/** converts radians to degrees 
+	*/
+	export function radiansToDegrees(angle : number) : number;	
+	/** Helpful macro that setups the GL server state, the correct GL program and sets the Model View Projection matrix
+	@param node setup node 
+	*/
+	export function nodeDrawSetup(node : Node) : void;	
+	/** <p>
+	 Increments the GL Draws counts by one.<br/>
+	 The number of calls per frame are displayed on the screen when the CCDirector's stats are enabled.<br/>
+	</p> 
+	*/
+	export function incrementGLDraws(addNumber : number) : void;	
+	/** Check webgl error.Error will be shown in console if exists. 
+	*/
+	export function checkGLErrorDebug() : void;	
 	/** !#en Checks whether the object is non-nil and not yet destroyed.
 	!#zh 检查该对象是否不为 null 并且尚未销毁。
 	
@@ -1152,6 +1199,97 @@ declare module cc {
 	It is recommended to not use this function every frame instead cache the result at startup. 
 	*/
 	export function find(path : string, referenceNode? : Node) : Node;	
+	/** !#en
+	The convenience method to create a new {{#crossLink "Color/Color:method"}}cc.Color{{/crossLink}}
+	Alpha channel is optional. Default value is 255.
+	
+	!#zh
+	通过该方法来创建一个新的 {{#crossLink "Color/Color:method"}}cc.Color{{/crossLink}} 对象。
+	Alpha 通道是可选的。默认值是 255。
+	
+	@example 
+	```js
+	-----------------------
+	// 1. All channels seperately as parameters
+	var color1 = new cc.Color(255, 255, 255, 255);
+	// 2. Convert a hex string to a color
+	var color2 = new cc.Color("#000000");
+	// 3. An color object as parameter
+	var color3 = new cc.Color({r: 255, g: 255, b: 255, a: 255});
+	
+	``` 
+	*/
+	export function color(r? : number, g? : number, b? : number, a? : number) : Color;	
+	/** !#en returns true if both ccColor3B are equal. Otherwise it returns false.
+	!#zh 判断两个颜色对象的 RGB 部分是否相等，不比较透明度。
+	
+	@example 
+	```js
+	cc.log(cc.colorEqual(cc.Color.RED, new cc.Color(255, 0, 0))); // true
+	``` 
+	*/
+	export function colorEqual(color1: (r: number, g: number, b: number, a: number) => void, color2: (r: number, g: number, b: number, a: number) => void) : boolean;	
+	/** !#en
+	convert a string of color for style to Color.
+	e.g. "#ff06ff"  to : cc.color(255,6,255)。
+	!#zh 16 进制转换为 Color
+	
+	@example 
+	```js
+	cc.hexToColor("#FFFF33"); // Color {r: 255, g: 255, b: 51, a: 255};
+	``` 
+	*/
+	export function hexToColor(hex : string) : Color;	
+	/** !#en
+	convert Color to a string of color for style.
+	e.g.  cc.color(255,6,255)  to : "#ff06ff"
+	!#zh Color 转换为 16进制。
+	
+	@example 
+	```js
+	var color = new cc.Color(255, 6, 255)
+	cc.colorToHex(color); // #ff06ff;
+	``` 
+	*/
+	export function colorToHex(color: (r: number, g: number, b: number, a: number) => void) : string;	
+	/** !#en
+	Define an enum type. <br/>
+	If a enum item has a value of -1, it will be given an Integer number according to it's order in the list.<br/>
+	Otherwise it will use the value specified by user who writes the enum definition.
+	
+	!#zh
+	定义一个枚举类型。<br/>
+	用户可以把枚举值设为任意的整数，如果设为 -1，系统将会分配为上一个枚举值 + 1。
+	@param obj a JavaScript literal object containing enum names and values
+	
+	@example 
+	```js
+	var WrapMode = cc.Enum({
+	    Repeat: -1,
+	    Clamp: -1
+	});
+	
+	// Texture.WrapMode.Repeat == 0
+	// Texture.WrapMode.Clamp == 1
+	// Texture.WrapMode[0] == "Repeat"
+	// Texture.WrapMode[1] == "Clamp"
+	
+	var FlagType = cc.Enum({
+	    Flag1: 1,
+	    Flag2: 2,
+	    Flag3: 4,
+	    Flag4: 8,
+	});
+	
+	var AtlasSizeList = cc.Enum({
+	    128: 128,
+	    256: 256,
+	    512: 512,
+	    1024: 1024,
+	});
+	``` 
+	*/
+	export function Enum(obj : any) : any;	
 	/** !#en Returns opposite of Vec2.
 	!#zh 返回相反的向量。
 	
@@ -1485,97 +1623,6 @@ declare module cc {
 	!#zh 规范化 v 向量，设置 v 向量长度为 1。 
 	*/
 	export function pNormalizeIn(v : Vec2) : void;	
-	/** !#en
-	The convenience method to create a new {{#crossLink "Color/Color:method"}}cc.Color{{/crossLink}}
-	Alpha channel is optional. Default value is 255.
-	
-	!#zh
-	通过该方法来创建一个新的 {{#crossLink "Color/Color:method"}}cc.Color{{/crossLink}} 对象。
-	Alpha 通道是可选的。默认值是 255。
-	
-	@example 
-	```js
-	-----------------------
-	// 1. All channels seperately as parameters
-	var color1 = new cc.Color(255, 255, 255, 255);
-	// 2. Convert a hex string to a color
-	var color2 = new cc.Color("#000000");
-	// 3. An color object as parameter
-	var color3 = new cc.Color({r: 255, g: 255, b: 255, a: 255});
-	
-	``` 
-	*/
-	export function color(r? : number, g? : number, b? : number, a? : number) : Color;	
-	/** !#en returns true if both ccColor3B are equal. Otherwise it returns false.
-	!#zh 判断两个颜色对象的 RGB 部分是否相等，不比较透明度。
-	
-	@example 
-	```js
-	cc.log(cc.colorEqual(cc.Color.RED, new cc.Color(255, 0, 0))); // true
-	``` 
-	*/
-	export function colorEqual(color1: (r: number, g: number, b: number, a: number) => void, color2: (r: number, g: number, b: number, a: number) => void) : boolean;	
-	/** !#en
-	convert a string of color for style to Color.
-	e.g. "#ff06ff"  to : cc.color(255,6,255)。
-	!#zh 16 进制转换为 Color
-	
-	@example 
-	```js
-	cc.hexToColor("#FFFF33"); // Color {r: 255, g: 255, b: 51, a: 255};
-	``` 
-	*/
-	export function hexToColor(hex : string) : Color;	
-	/** !#en
-	convert Color to a string of color for style.
-	e.g.  cc.color(255,6,255)  to : "#ff06ff"
-	!#zh Color 转换为 16进制。
-	
-	@example 
-	```js
-	var color = new cc.Color(255, 6, 255)
-	cc.colorToHex(color); // #ff06ff;
-	``` 
-	*/
-	export function colorToHex(color: (r: number, g: number, b: number, a: number) => void) : string;	
-	/** !#en
-	Define an enum type. <br/>
-	If a enum item has a value of -1, it will be given an Integer number according to it's order in the list.<br/>
-	Otherwise it will use the value specified by user who writes the enum definition.
-	
-	!#zh
-	定义一个枚举类型。<br/>
-	用户可以把枚举值设为任意的整数，如果设为 -1，系统将会分配为上一个枚举值 + 1。
-	@param obj a JavaScript literal object containing enum names and values
-	
-	@example 
-	```js
-	var WrapMode = cc.Enum({
-	    Repeat: -1,
-	    Clamp: -1
-	});
-	
-	// Texture.WrapMode.Repeat == 0
-	// Texture.WrapMode.Clamp == 1
-	// Texture.WrapMode[0] == "Repeat"
-	// Texture.WrapMode[1] == "Clamp"
-	
-	var FlagType = cc.Enum({
-	    Flag1: 1,
-	    Flag2: 2,
-	    Flag3: 4,
-	    Flag4: 8,
-	});
-	
-	var AtlasSizeList = cc.Enum({
-	    128: 128,
-	    256: 256,
-	    512: 512,
-	    1024: 1024,
-	});
-	``` 
-	*/
-	export function Enum(obj : any) : any;	
 	/** !#en
 	The convenience method to create a new Rect.
 	see {{#crossLink "Rect/Rect:method"}}cc.Rect{{/crossLink}}
@@ -2110,263 +2157,6 @@ declare module cc {
 		*/
 		armature() : any;	
 	}		
-		/** !#en Base class cc.Action for action classes.
-		!#zh Action 类是所有动作类型的基类。 */
-		export class Action {		
-		/** !#en
-		to copy object with deep copy.
-		returns a clone of action.
-		!#zh 返回一个克隆的动作。 
-		*/
-		clone() : Action;		
-		/** !#en
-		return true if the action has finished.
-		!#zh 如果动作已完成就返回 true。 
-		*/
-		isDone() : boolean;		
-		/** !#en get the target.
-		!#zh 获取当前目标节点。 
-		*/
-		getTarget() : Node;		
-		/** !#en The action will modify the target properties.
-		!#zh 设置目标节点。 
-		*/
-		setTarget(target : Node) : void;		
-		/** !#en get the original target.
-		!#zh 获取原始目标节点。 
-		*/
-		getOriginalTarget() : Node;		
-		/** !#en get tag number.
-		!#zh 获取用于识别动作的标签。 
-		*/
-		getTag() : number;		
-		/** !#en set tag number.
-		!#zh 设置标签，用于识别动作。 
-		*/
-		setTag(tag : number) : void;		
-		/** !#en Default Action tag.
-		!#zh 默认动作标签。 */
-		TAG_INVALID : number;	
-	}		
-		/** !#en
-		Base class actions that do have a finite time duration. <br/>
-		Possible actions: <br/>
-		- An action with a duration of 0 seconds. <br/>
-		- An action with a duration of 35.5 seconds.
-		
-		Infinite time actions are valid
-		!#zh 有限时间动作，这种动作拥有时长 duration 属性。 */
-		export class FiniteTimeAction extends Action {		
-		/** !#en get duration of the action. (seconds).
-		!#zh 获取动作以秒为单位的持续时间。 
-		*/
-		getDuration() : number;		
-		/** !#en set duration of the action. (seconds).
-		!#zh 设置动作以秒为单位的持续时间。 
-		*/
-		setDuration(duration : number) : void;		
-		/** !#en
-		Returns a reversed action. <br />
-		For example: <br />
-		- The action will be x coordinates of 0 move to 100. <br />
-		- The reversed action will be x of 100 move to 0.
-		- Will be rewritten
-		!#zh 返回一个新的动作，执行与原动作完全相反的动作。 
-		*/
-		reverse() : void;		
-		/** !#en
-		to copy object with deep copy.
-		returns a clone of action.
-		!#zh 返回一个克隆的动作。 
-		*/
-		clone() : FiniteTimeAction;	
-	}		
-		/** !#en Base class for Easing actions.
-		!#zh 所有缓动动作基类，用于修饰 ActionInterval。 */
-		export class ActionEase extends ActionInterval {	
-	}		
-		/** !#en Base class for Easing actions with rate parameters
-		!#zh 拥有速率属性的缓动动作基类。 */
-		export class EaseRateAction extends ActionEase {	
-	}		
-		/** !#en Ease Elastic abstract class.
-		!#zh 弹性缓动动作基类。 */
-		export class EaseElastic extends ActionEase {	
-	}		
-		/** !#en cc.EaseBounce abstract class.
-		!#zh 反弹缓动动作基类。 */
-		export class EaseBounce extends ActionEase {	
-	}		
-		/** !#en Instant actions are immediate actions. They don't have a duration like the ActionInterval actions.
-		!#zh 即时动作，这种动作立即就会执行，继承自 FiniteTimeAction。 */
-		export class ActionInstant extends FiniteTimeAction {	
-	}		
-		/** !#en
-		<p> An interval action is an action that takes place within a certain period of time. <br/>
-		It has an start time, and a finish time. The finish time is the parameter<br/>
-		duration plus the start time.</p>
-		
-		<p>These CCActionInterval actions have some interesting properties, like:<br/>
-		- They can run normally (default)  <br/>
-		- They can run reversed with the reverse method   <br/>
-		- They can run with the time altered with the Accelerate, AccelDeccel and Speed actions. </p>
-		
-		<p>For example, you can simulate a Ping Pong effect running the action normally and<br/>
-		then running it again in Reverse mode. </p>
-		!#zh 时间间隔动作，这种动作在已定时间内完成，继承 FiniteTimeAction。 */
-		export class ActionInterval extends FiniteTimeAction {		
-		/** !#en Implementation of ease motion.
-		!#zh 缓动运动。
-		
-		@example 
-		
-		action.easing(cc.easeIn(3.0));,```js
-		action.easing(cc.easeIn(3.0));
-		``` 
-		*/
-		easing(easeObj : any) : ActionInterval;		
-		/** !#en
-		Repeats an action a number of times.
-		To repeat an action forever use the CCRepeatForever action.
-		!#zh 重复动作可以按一定次数重复一个动作，使用 RepeatForever 动作来永远重复一个动作。 
-		*/
-		repeat(times : void) : ActionInterval;		
-		/** !#en
-		Repeats an action for ever.  <br/>
-		To repeat the an action for a limited number of times use the Repeat action. <br/>
-		!#zh 永远地重复一个动作，有限次数内重复一个动作请使用 Repeat 动作。 
-		*/
-		repeatForever() : ActionInterval;	
-	}		
-		/** !#en Class for animation data handling.
-		!#zh 动画剪辑，用于存储动画数据。 */
-		export class AnimationClip extends Asset {		
-		/** !#en Duration of this animation.
-		!#zh 动画的持续时间。 */
-		duration : number;		
-		/** !#en FrameRate of this animation.
-		!#zh 动画的帧速率。 */
-		sample : number;		
-		/** !#en Speed of this animation.
-		!#zh 动画的播放速度。 */
-		speed : number;		
-		/** !#en WrapMode of this animation.
-		!#zh 动画的循环模式。 */
-		wrapMode : WrapMode;		
-		/** !#en Curve data.
-		!#zh 曲线数据。 */
-		curveData : any;		
-		/** !#en Event data.
-		!#zh 事件数据。 */
-		events : any[];		
-		/** !#en Crate clip with a set of sprite frames
-		!#zh 使用一组序列帧图片来创建动画剪辑
-		
-		@example 
-		```js
-		var clip = cc.AnimationClip.createWithSpriteFrames(spriteFrames, 10);
-		``` 
-		*/
-		createWithSpriteFrames(spriteFrames : [SpriteFrame], sample : number) : AnimationClip;	
-	}		
-		/** !#en
-		The AnimationState gives full control over animation playback process.
-		In most cases the Animation Component is sufficient and easier to use. Use the AnimationState if you need full control.
-		!#zh
-		AnimationState 完全控制动画播放过程。<br/>
-		大多数情况下 动画组件 是足够和易于使用的。如果您需要更多的动画控制接口，请使用 AnimationState。 */
-		export class AnimationState extends AnimationNode {		
-		/**  
-		*/
-		AnimationState(clip : AnimationClip, name? : string) : AnimationState;		
-		/** !#en The clip that is being played by this animation state.
-		!#zh 此动画状态正在播放的剪辑。 */
-		clip : AnimationClip;		
-		/** !#en The name of the playing animation.
-		!#zh 动画的名字 */
-		name : string;	
-	}		
-		/** undefined */
-		export class Playable {		
-		/** !#en Is playing or paused in play mode?
-		!#zh 当前是否正在播放。 */
-		isPlaying : boolean;		
-		/** !#en Is currently paused? This can be true even if in edit mode(isPlaying == false).
-		!#zh 当前是否正在暂停 */
-		isPaused : boolean;		
-		/** !#en Play this animation.
-		!#zh 播放动画。 
-		*/
-		play() : void;		
-		/** !#en Stop this animation.
-		!#zh 停止动画播放。 
-		*/
-		stop() : void;		
-		/** !#en Pause this animation.
-		!#zh 暂停动画。 
-		*/
-		pause() : void;		
-		/** !#en Resume this animation.
-		!#zh 重新播放动画。 
-		*/
-		resume() : void;		
-		/** !#en Perform a single frame step.
-		!#zh 执行一帧动画。 
-		*/
-		step() : void;	
-	}	
-	/** !#en Specifies how time is treated when it is outside of the keyframe range of an Animation.
-	!#zh 动画使用的循环模式。 */
-	export enum WrapMode {		
-		Default = 0,
-		Normal = 0,
-		Reverse = 0,
-		Loop = 0,
-		LoopReverse = 0,
-		PingPong = 0,
-		PingPongReverse = 0,	
-	}		
-		/** !#en The abstract interface for all playing animation.
-		!#zh 所有播放动画的抽象接口。 */
-		export class AnimationNodeBase extends Playable {	
-	}		
-		/** !#en The collection and instance of playing animations.
-		!#zh 动画曲线的集合，根据当前时间计算出每条曲线的状态。 */
-		export class AnimationNode extends AnimationNodeBase {		
-		/** !#en The curves list.
-		!#zh 曲线列表。 */
-		curves : AnimCurve[];		
-		/** !#en The start delay which represents the number of seconds from an animation's start time to the start of
-		the active interval.
-		!#zh 延迟多少秒播放。 */
-		delay : number;		
-		/** !#en The animation's iteration count property.
-		
-		A real number greater than or equal to zero (including positive infinity) representing the number of times
-		to repeat the animation node.
-		
-		Values less than zero and NaN values are treated as the value 1.0 for the purpose of timing model
-		calculations.
-		
-		!#zh 迭代次数，指动画播放多少次后结束, normalize time。 如 2.5（2次半） */
-		repeatCount : number;		
-		/** !#en The iteration duration of this animation in seconds. (length)
-		!#zh 单次动画的持续时间，秒。 */
-		duration : number;		
-		/** !#en The animation's playback speed. 1 is normal playback speed.
-		!#zh 播放速率。 */
-		speed : number;		
-		/** !#en
-		Wrapping mode of the playing animation.
-		Notice : dynamic change wrapMode will reset time and repeatCount property
-		!#zh
-		动画循环方式。
-		需要注意的是，动态修改 wrapMode 时，会重置 time 以及 repeatCount */
-		wrapMode : WrapMode;		
-		/** !#en The current time of this animation in seconds.
-		!#zh 动画当前的时间，秒。 */
-		time : number;	
-	}		
 		/** !#en cc.audioEngine is the singleton object, it provide simple audio APIs.
 		!#zh
 		cc.audioengine是单例对象。<br/>
@@ -2616,6 +2406,134 @@ declare module cc {
 		``` 
 		*/
 		setMaxWebAudioSize(kb : void) : void;	
+	}		
+		/** !#en Base class cc.Action for action classes.
+		!#zh Action 类是所有动作类型的基类。 */
+		export class Action {		
+		/** !#en
+		to copy object with deep copy.
+		returns a clone of action.
+		!#zh 返回一个克隆的动作。 
+		*/
+		clone() : Action;		
+		/** !#en
+		return true if the action has finished.
+		!#zh 如果动作已完成就返回 true。 
+		*/
+		isDone() : boolean;		
+		/** !#en get the target.
+		!#zh 获取当前目标节点。 
+		*/
+		getTarget() : Node;		
+		/** !#en The action will modify the target properties.
+		!#zh 设置目标节点。 
+		*/
+		setTarget(target : Node) : void;		
+		/** !#en get the original target.
+		!#zh 获取原始目标节点。 
+		*/
+		getOriginalTarget() : Node;		
+		/** !#en get tag number.
+		!#zh 获取用于识别动作的标签。 
+		*/
+		getTag() : number;		
+		/** !#en set tag number.
+		!#zh 设置标签，用于识别动作。 
+		*/
+		setTag(tag : number) : void;		
+		/** !#en Default Action tag.
+		!#zh 默认动作标签。 */
+		TAG_INVALID : number;	
+	}		
+		/** !#en
+		Base class actions that do have a finite time duration. <br/>
+		Possible actions: <br/>
+		- An action with a duration of 0 seconds. <br/>
+		- An action with a duration of 35.5 seconds.
+		
+		Infinite time actions are valid
+		!#zh 有限时间动作，这种动作拥有时长 duration 属性。 */
+		export class FiniteTimeAction extends Action {		
+		/** !#en get duration of the action. (seconds).
+		!#zh 获取动作以秒为单位的持续时间。 
+		*/
+		getDuration() : number;		
+		/** !#en set duration of the action. (seconds).
+		!#zh 设置动作以秒为单位的持续时间。 
+		*/
+		setDuration(duration : number) : void;		
+		/** !#en
+		Returns a reversed action. <br />
+		For example: <br />
+		- The action will be x coordinates of 0 move to 100. <br />
+		- The reversed action will be x of 100 move to 0.
+		- Will be rewritten
+		!#zh 返回一个新的动作，执行与原动作完全相反的动作。 
+		*/
+		reverse() : void;		
+		/** !#en
+		to copy object with deep copy.
+		returns a clone of action.
+		!#zh 返回一个克隆的动作。 
+		*/
+		clone() : FiniteTimeAction;	
+	}		
+		/** !#en Base class for Easing actions.
+		!#zh 所有缓动动作基类，用于修饰 ActionInterval。 */
+		export class ActionEase extends ActionInterval {	
+	}		
+		/** !#en Base class for Easing actions with rate parameters
+		!#zh 拥有速率属性的缓动动作基类。 */
+		export class EaseRateAction extends ActionEase {	
+	}		
+		/** !#en Ease Elastic abstract class.
+		!#zh 弹性缓动动作基类。 */
+		export class EaseElastic extends ActionEase {	
+	}		
+		/** !#en cc.EaseBounce abstract class.
+		!#zh 反弹缓动动作基类。 */
+		export class EaseBounce extends ActionEase {	
+	}		
+		/** !#en Instant actions are immediate actions. They don't have a duration like the ActionInterval actions.
+		!#zh 即时动作，这种动作立即就会执行，继承自 FiniteTimeAction。 */
+		export class ActionInstant extends FiniteTimeAction {	
+	}		
+		/** !#en
+		<p> An interval action is an action that takes place within a certain period of time. <br/>
+		It has an start time, and a finish time. The finish time is the parameter<br/>
+		duration plus the start time.</p>
+		
+		<p>These CCActionInterval actions have some interesting properties, like:<br/>
+		- They can run normally (default)  <br/>
+		- They can run reversed with the reverse method   <br/>
+		- They can run with the time altered with the Accelerate, AccelDeccel and Speed actions. </p>
+		
+		<p>For example, you can simulate a Ping Pong effect running the action normally and<br/>
+		then running it again in Reverse mode. </p>
+		!#zh 时间间隔动作，这种动作在已定时间内完成，继承 FiniteTimeAction。 */
+		export class ActionInterval extends FiniteTimeAction {		
+		/** !#en Implementation of ease motion.
+		!#zh 缓动运动。
+		
+		@example 
+		
+		action.easing(cc.easeIn(3.0));,```js
+		action.easing(cc.easeIn(3.0));
+		``` 
+		*/
+		easing(easeObj : any) : ActionInterval;		
+		/** !#en
+		Repeats an action a number of times.
+		To repeat an action forever use the CCRepeatForever action.
+		!#zh 重复动作可以按一定次数重复一个动作，使用 RepeatForever 动作来永远重复一个动作。 
+		*/
+		repeat(times : void) : ActionInterval;		
+		/** !#en
+		Repeats an action for ever.  <br/>
+		To repeat the an action for a limited number of times use the Repeat action. <br/>
+		!#zh 永远地重复一个动作，有限次数内重复一个动作请使用 Repeat 动作。 
+		*/
+		repeatForever() : ActionInterval;	
 	}		
 		/** !#en
 		cc.ActionManager is a class that can manage actions.<br/>
@@ -3002,16 +2920,18 @@ declare module cc {
 		     6 - cc.error, cc.assert will print on canvas, available only on web.                 <br/>
 		2. showFPS<br/>
 		     Left bottom corner fps information will show when "showFPS" equals true, otherwise it will be hide.<br/>
-		3. frameRate<br/>
+		3. exposeClassName<br/>
+		     Expose class name to chrome debug tools, the class intantiate performance is a little bit slower when exposed.<br/>
+		4. frameRate<br/>
 		     "frameRate" set the wanted frame rate for your game, but the real fps depends on your game implementation and the running environment.<br/>
-		4. id<br/>
+		5. id<br/>
 		     "gameCanvas" sets the id of your canvas element on the web page, it's useful only on web.<br/>
-		5. renderMode<br/>
+		6. renderMode<br/>
 		     "renderMode" sets the renderer type, only useful on web :<br/>
 		     0 - Automatically chosen by engine<br/>
 		     1 - Forced to use canvas renderer<br/>
 		     2 - Forced to use WebGL renderer, but this will be ignored on mobile browsers<br/>
-		6. scenes<br/>
+		7. scenes<br/>
 		     "scenes" include available scenes in the current bundle.<br/>
 		<br/>
 		Please DO NOT modify this object directly, it won't have any effect.<br/>
@@ -3028,16 +2948,18 @@ declare module cc {
 		         6 - cc.error，cc.assert 将打印在 canvas 中（仅适用于 web 端）。                  <br/>
 		2. showFPS（显示 FPS）                                                            <br/>
 		     当 showFPS 为 true 的时候界面的左下角将显示 fps 的信息，否则被隐藏。              <br/>
-		3. frameRate (帧率)                                                              <br/>
+		3. exposeClassName                                                           <br/>
+		     暴露类名让 Chrome DevTools 可以识别，如果开启会稍稍降低类的创建过程的性能，但对对象构造没有影响。 <br/>
+		4. frameRate (帧率)                                                              <br/>
 		     “frameRate” 设置想要的帧率你的游戏，但真正的FPS取决于你的游戏实现和运行环境。      <br/>
-		4. id                                                                            <br/>
+		5. id                                                                            <br/>
 		     "gameCanvas" Web 页面上的 Canvas Element ID，仅适用于 web 端。                         <br/>
-		5. renderMode（渲染模式）                                                         <br/>
+		6. renderMode（渲染模式）                                                         <br/>
 		     “renderMode” 设置渲染器类型，仅适用于 web 端：                              <br/>
 		         0 - 通过引擎自动选择。                                                     <br/>
 		         1 - 强制使用 canvas 渲染。
 		         2 - 强制使用 WebGL 渲染，但是在部分 Android 浏览器中这个选项会被忽略。     <br/>
-		6. scenes                                                                         <br/>
+		7. scenes                                                                         <br/>
 		     “scenes” 当前包中可用场景。                                                   <br/>
 		<br/>
 		注意：请不要直接修改这个对象，它不会有任何效果。 */
@@ -3626,6 +3548,135 @@ declare module cc {
 		/** !#en Minimum priority level for user scheduling.
 		!#zh 用户调度最低优先级。 */
 		PRIORITY_NON_SYSTEM : number;	
+	}		
+		/** !#en Class for animation data handling.
+		!#zh 动画剪辑，用于存储动画数据。 */
+		export class AnimationClip extends Asset {		
+		/** !#en Duration of this animation.
+		!#zh 动画的持续时间。 */
+		duration : number;		
+		/** !#en FrameRate of this animation.
+		!#zh 动画的帧速率。 */
+		sample : number;		
+		/** !#en Speed of this animation.
+		!#zh 动画的播放速度。 */
+		speed : number;		
+		/** !#en WrapMode of this animation.
+		!#zh 动画的循环模式。 */
+		wrapMode : WrapMode;		
+		/** !#en Curve data.
+		!#zh 曲线数据。 */
+		curveData : any;		
+		/** !#en Event data.
+		!#zh 事件数据。 */
+		events : any[];		
+		/** !#en Crate clip with a set of sprite frames
+		!#zh 使用一组序列帧图片来创建动画剪辑
+		
+		@example 
+		```js
+		var clip = cc.AnimationClip.createWithSpriteFrames(spriteFrames, 10);
+		``` 
+		*/
+		createWithSpriteFrames(spriteFrames : [SpriteFrame], sample : number) : AnimationClip;	
+	}		
+		/** !#en
+		The AnimationState gives full control over animation playback process.
+		In most cases the Animation Component is sufficient and easier to use. Use the AnimationState if you need full control.
+		!#zh
+		AnimationState 完全控制动画播放过程。<br/>
+		大多数情况下 动画组件 是足够和易于使用的。如果您需要更多的动画控制接口，请使用 AnimationState。 */
+		export class AnimationState extends AnimationNode {		
+		/**  
+		*/
+		AnimationState(clip : AnimationClip, name? : string) : AnimationState;		
+		/** !#en The clip that is being played by this animation state.
+		!#zh 此动画状态正在播放的剪辑。 */
+		clip : AnimationClip;		
+		/** !#en The name of the playing animation.
+		!#zh 动画的名字 */
+		name : string;	
+	}		
+		/** undefined */
+		export class Playable {		
+		/** !#en Is playing or paused in play mode?
+		!#zh 当前是否正在播放。 */
+		isPlaying : boolean;		
+		/** !#en Is currently paused? This can be true even if in edit mode(isPlaying == false).
+		!#zh 当前是否正在暂停 */
+		isPaused : boolean;		
+		/** !#en Play this animation.
+		!#zh 播放动画。 
+		*/
+		play() : void;		
+		/** !#en Stop this animation.
+		!#zh 停止动画播放。 
+		*/
+		stop() : void;		
+		/** !#en Pause this animation.
+		!#zh 暂停动画。 
+		*/
+		pause() : void;		
+		/** !#en Resume this animation.
+		!#zh 重新播放动画。 
+		*/
+		resume() : void;		
+		/** !#en Perform a single frame step.
+		!#zh 执行一帧动画。 
+		*/
+		step() : void;	
+	}	
+	/** !#en Specifies how time is treated when it is outside of the keyframe range of an Animation.
+	!#zh 动画使用的循环模式。 */
+	export enum WrapMode {		
+		Default = 0,
+		Normal = 0,
+		Reverse = 0,
+		Loop = 0,
+		LoopReverse = 0,
+		PingPong = 0,
+		PingPongReverse = 0,	
+	}		
+		/** !#en The abstract interface for all playing animation.
+		!#zh 所有播放动画的抽象接口。 */
+		export class AnimationNodeBase extends Playable {	
+	}		
+		/** !#en The collection and instance of playing animations.
+		!#zh 动画曲线的集合，根据当前时间计算出每条曲线的状态。 */
+		export class AnimationNode extends AnimationNodeBase {		
+		/** !#en The curves list.
+		!#zh 曲线列表。 */
+		curves : AnimCurve[];		
+		/** !#en The start delay which represents the number of seconds from an animation's start time to the start of
+		the active interval.
+		!#zh 延迟多少秒播放。 */
+		delay : number;		
+		/** !#en The animation's iteration count property.
+		
+		A real number greater than or equal to zero (including positive infinity) representing the number of times
+		to repeat the animation node.
+		
+		Values less than zero and NaN values are treated as the value 1.0 for the purpose of timing model
+		calculations.
+		
+		!#zh 迭代次数，指动画播放多少次后结束, normalize time。 如 2.5（2次半） */
+		repeatCount : number;		
+		/** !#en The iteration duration of this animation in seconds. (length)
+		!#zh 单次动画的持续时间，秒。 */
+		duration : number;		
+		/** !#en The animation's playback speed. 1 is normal playback speed.
+		!#zh 播放速率。 */
+		speed : number;		
+		/** !#en
+		Wrapping mode of the playing animation.
+		Notice : dynamic change wrapMode will reset time and repeatCount property
+		!#zh
+		动画循环方式。
+		需要注意的是，动态修改 wrapMode 时，会重置 time 以及 repeatCount */
+		wrapMode : WrapMode;		
+		/** !#en The current time of this animation in seconds.
+		!#zh 动画当前的时间，秒。 */
+		time : number;	
 	}		
 		/** !#en
 		cc.MotionStreak manages a Ribbon based on it's motion in absolute space.                 <br/>
@@ -4478,9 +4529,20 @@ declare module cc {
 		!#zh 字体资源类。 */
 		export class Font extends RawAsset {	
 	}		
+		/** !#en Class for LabelAtlas handling.
+		!#zh 艺术数字字体资源类。 */
+		export class LabelAtlas extends cc.BitmapFont {	
+	}		
 		/** !#en Class for prefab handling.
 		!#zh 预制资源类。 */
-		export class Prefab extends Asset {	
+		export class Prefab extends Asset {		
+		/** the main cc.Node in the prefab */
+		data : Node;		
+		/** Dynamically translation prefab data into minimized code.<br/>
+		This method will be called automatically before the first time the prefab being instantiated,
+		but you can re-call to refresh the create function once you modified the original prefab data in script. 
+		*/
+		compileCreateFunction() : void;	
 	}		
 		/** !#en
 		The base class for registering asset types.
@@ -4667,6 +4729,206 @@ declare module cc {
 		/** !#en Polygon points
 		!#zh 多边形顶点数组 */
 		points : [Vec2];	
+	}		
+		/** !#en
+		EventTarget is an object to which an event is dispatched when something has occurred.
+		Entity are the most common event targets, but other objects can be event targets too.
+		
+		Event targets are an important part of the Fireball event model.
+		The event target serves as the focal point for how events flow through the scene graph.
+		When an event such as a mouse click or a keypress occurs, Fireball dispatches an event object
+		into the event flow from the root of the hierarchy. The event object then makes its way through
+		the scene graph until it reaches the event target, at which point it begins its return trip through
+		the scene graph. This round-trip journey to the event target is conceptually divided into three phases:
+		- The capture phase comprises the journey from the root to the last node before the event target's node
+		- The target phase comprises only the event target node
+		- The bubbling phase comprises any subsequent nodes encountered on the return trip to the root of the tree
+		See also: http://www.w3.org/TR/DOM-Level-3-Events/#event-flow
+		
+		Event targets can implement the following methods:
+		 - _getCapturingTargets
+		 - _getBubblingTargets
+		
+		!#zh
+		事件目标是事件触发时，分派的事件对象，Node 是最常见的事件目标，
+		但是其他对象也可以是事件目标。<br/> */
+		export class EventTarget {		
+		/** !#en
+		Register an callback of a specific event type on the EventTarget.
+		This method is merely an alias to addEventListener.
+		!#zh
+		注册事件目标的特定事件类型回调，仅仅是 addEventListener 的别名。
+		@param type A string representing the event type to listen for.
+		@param callback The callback that will be invoked when the event is dispatched.
+		                             The callback is ignored if it is a duplicate (the callbacks are unique).
+		@param target The target to invoke the callback, can be null
+		@param useCapture When set to true, the capture argument prevents callback
+		                             from being invoked when the event's eventPhase attribute value is BUBBLING_PHASE.
+		                             When false, callback will NOT be invoked when event's eventPhase attribute value is CAPTURING_PHASE.
+		                             Either way, callback will be invoked when event's eventPhase attribute value is AT_TARGET.
+		
+		@example 
+		```js
+		node.on(cc.Node.EventType.TOUCH_END, function (event) {
+		    cc.log("this is callback");
+		}, node);
+		``` 
+		*/
+		on(type : string, callback: (param: Event) => void, target : any, useCapture : boolean) : Function;		
+		/** !#en
+		Removes the callback previously registered with the same type, callback, target and or useCapture.
+		This method is merely an alias to removeEventListener.
+		!#zh
+		删除之前与同类型，回调，目标或 useCapture 注册的回调，仅仅是 removeEventListener 的别名。
+		@param type A string representing the event type being removed.
+		@param callback The callback to remove.
+		@param target The target to invoke the callback, if it's not given, only callback without target will be removed
+		@param useCapture Specifies whether the callback being removed was registered as a capturing callback or not.
+		                             If not specified, useCapture defaults to false. If a callback was registered twice,
+		                             one with capture and one without, each must be removed separately. Removal of a capturing callback
+		                             does not affect a non-capturing version of the same listener, and vice versa.
+		
+		@example 
+		```js
+		// register touchEnd eventListener
+		var touchEnd = node.on(cc.Node.EventType.TOUCH_END, function (event) {
+		    cc.log("this is callback");
+		}, node);
+		// remove touchEnd eventListener
+		node.off(cc.Node.EventType.TOUCH_END, touchEnd, node);
+		``` 
+		*/
+		off(type : string, callback : Function, target : any, useCapture : boolean) : void;		
+		/** !#en Removes all callbacks previously registered with the same target.
+		!#zh 删除指定目标上的所有注册回调。
+		@param target The target to be searched for all related callbacks 
+		*/
+		targetOff(target : any) : void;		
+		/** !#en
+		Register an callback of a specific event type on the EventTarget,
+		the callback will remove itself after the first time it is triggered.
+		!#zh
+		注册事件目标的特定事件类型回调，回调会在第一时间被触发后删除自身。
+		@param type A string representing the event type to listen for.
+		@param callback The callback that will be invoked when the event is dispatched.
+		                             The callback is ignored if it is a duplicate (the callbacks are unique).
+		@param target The target to invoke the callback, can be null
+		@param useCapture When set to true, the capture argument prevents callback
+		                             from being invoked when the event's eventPhase attribute value is BUBBLING_PHASE.
+		                             When false, callback will NOT be invoked when event's eventPhase attribute value is CAPTURING_PHASE.
+		                             Either way, callback will be invoked when event's eventPhase attribute value is AT_TARGET.
+		
+		@example 
+		```js
+		node.once(cc.Node.EventType.TOUCH_END, function (event) {
+		    cc.log("this is callback");
+		}, node);
+		``` 
+		*/
+		once(type : string, callback: (param: Event) => void, target : any, useCapture : boolean) : void;		
+		/** !#en
+		Dispatches an event into the event flow.
+		The event target is the EventTarget object upon which the dispatchEvent() method is called.
+		!#zh 分发事件到事件流中。
+		@param event The Event object that is dispatched into the event flow 
+		*/
+		dispatchEvent(event : Event) : void;		
+		/** !#en
+		Send an event to this object directly, this method will not propagate the event to any other objects.
+		The event will be created from the supplied message, you can get the "detail" argument from event.detail.
+		!#zh
+		该对象直接发送事件， 这种方法不会对事件传播到任何其他对象。
+		@param message the message to send
+		@param detail whatever argument the message needs 
+		*/
+		emit(message : string, detail? : any) : void;	
+	}		
+		/** !#en Base class of all kinds of events.
+		!#zh 包含事件相关信息的对象。 */
+		export class Event {		
+		/** 
+		@param type The name of the event (case-sensitive), e.g. "click", "fire", or "submit"
+		@param bubbles A boolean indicating whether the event bubbles up through the tree or not 
+		*/
+		Event(type : string, bubbles : boolean) : Event;		
+		/** !#en The name of the event (case-sensitive), e.g. "click", "fire", or "submit".
+		!#zh 事件类型。 */
+		type : string;		
+		/** !#en Indicate whether the event bubbles up through the tree or not.
+		!#zh 表示该事件是否进行冒泡。 */
+		bubbles : boolean;		
+		/** !#en A reference to the target to which the event was originally dispatched.
+		!#zh 最初事件触发的目标 */
+		target : any;		
+		/** !#en A reference to the currently registered target for the event.
+		!#zh 当前目标 */
+		currentTarget : any;		
+		/** !#en
+		Indicates which phase of the event flow is currently being evaluated.
+		Returns an integer value represented by 4 constants:
+		 - Event.NONE = 0
+		 - Event.CAPTURING_PHASE = 1
+		 - Event.AT_TARGET = 2
+		 - Event.BUBBLING_PHASE = 3
+		The phases are explained in the [section 3.1, Event dispatch and DOM event flow]
+		(http://www.w3.org/TR/DOM-Level-3-Events/#event-flow), of the DOM Level 3 Events specification.
+		!#zh 事件阶段 */
+		eventPhase : number;		
+		/** !#en Reset the event for being stored in the object pool.
+		!#zh 重置对象池中存储的事件。 
+		*/
+		unuse() : string;		
+		/** !#en Reuse the event for being used again by the object pool.
+		!#zh 用于对象池再次使用的事件。 
+		*/
+		reuse() : string;		
+		/** !#en Stops propagation for current event.
+		!#zh 停止传递当前事件。 
+		*/
+		stopPropagation() : void;		
+		/** !#en Stops propagation for current event immediately,
+		the event won't even be dispatched to the listeners attached in the current target.
+		!#zh 立即停止当前事件的传递，事件甚至不会被分派到所连接的当前目标。 
+		*/
+		stopPropagationImmediate() : void;		
+		/** !#en Checks whether the event has been stopped.
+		!#zh 检查该事件是否已经停止传递. 
+		*/
+		isStopped() : boolean;		
+		/** !#en
+		<p>
+		    Gets current target of the event                                                            <br/>
+		    note: It only be available when the event listener is associated with node.                <br/>
+		         It returns 0 when the listener is associated with fixed priority.
+		</p>
+		!#zh 获取当前目标节点 
+		*/
+		getCurrentTarget() : Node;		
+		/** !#en Gets the event type.
+		!#zh 获取事件类型 
+		*/
+		getType() : string;		
+		/** !#en Code for event without type.
+		!#zh 没有类型的事件 */
+		NO_TYPE : string;		
+		/** !#en Events not currently dispatched are in this phase
+		!#zh 尚未派发事件阶段 */
+		NONE : number;		
+		/** !#en
+		The capturing phase comprises the journey from the root to the last node before the event target's node
+		see http://www.w3.org/TR/DOM-Level-3-Events/#event-flow
+		!#zh 捕获阶段，包括事件目标节点之前从根节点到最后一个节点的过程。 */
+		CAPTURING_PHASE : number;		
+		/** !#en
+		The target phase comprises only the event target node
+		see http://www.w3.org/TR/DOM-Level-3-Events/#event-flow
+		!#zh 目标阶段仅包括事件目标节点。 */
+		AT_TARGET : number;		
+		/** !#en
+		The bubbling phase comprises any subsequent nodes encountered on the return trip to the root of the hierarchy
+		see http://www.w3.org/TR/DOM-Level-3-Events/#event-flow
+		!#zh 冒泡阶段， 包括回程遇到到层次根节点的任何后续节点。 */
+		BUBBLING_PHASE : number;	
 	}		
 		/** !#en The animation component is used to play back animations.
 		
@@ -5227,7 +5489,7 @@ declare module cc {
 		string : string;		
 		/** !#en The background image of EditBox.
 		!#zh 输入框的背景图片 */
-		backGroundImage : SpriteFrame;		
+		backgroundImage : SpriteFrame;		
 		/** !#en
 		The return key type of EditBox.
 		Note: it is meaningless for web platforms and desktop platforms.
@@ -6075,11 +6337,15 @@ declare module cc {
 		/** !#en
 		Stores and manipulate the anchoring based on its parent.
 		Widget are used for GUI but can also be used for other things.
-		Widget will adjust current node's position and size automatically, but the results after adjustment can not be obtained until the next frame.
+		Widget will adjust current node's position and size automatically, but the results after adjustment can not be obtained until the next frame unless you call {{#crossLink "Widget/updateAlignment:method"}}{{/crossLink}} manually.
 		!#zh
 		Widget 组件，用于设置和适配其相对于父节点的边距，Widget 通常被用于 UI 界面，也可以用于其他地方。
-		Widget 会自动调整当前节点的坐标和宽高，不过目前调整后的结果要到下一帧才能在脚本里获取到。 */
+		Widget 会自动调整当前节点的坐标和宽高，不过目前调整后的结果要到下一帧才能在脚本里获取到，除非你先手动调用 {{#crossLink "Widget/updateAlignment:method"}}{{/crossLink}}。 */
 		export class Widget extends Component {		
+		/** !#en Specifies an alignment target that can only be one of the parent nodes of the current node.
+		The default value is null, and when null, indicates the current parent.
+		!#zh 指定一个对齐目标，只能是当前节点的其中一个父节点，默认为空，为空时表示当前父节点。 */
+		target : Node;		
 		/** !#en Whether to align the top.
 		!#zh 是否对齐上边。 */
 		isAlignTop : boolean;		
@@ -6179,207 +6445,23 @@ declare module cc {
 		开启后仅会在 onEnable 的当帧结束时对齐一次，然后立刻禁用当前组件。
 		这样便于脚本或动画继续控制当前节点。
 		注意：onEnable 时所在的那一帧仍然会进行对齐。 */
-		isAlignOnce : boolean;	
-	}		
+		isAlignOnce : boolean;		
 		/** !#en
-		EventTarget is an object to which an event is dispatched when something has occurred.
-		Entity are the most common event targets, but other objects can be event targets too.
-		
-		Event targets are an important part of the Fireball event model.
-		The event target serves as the focal point for how events flow through the scene graph.
-		When an event such as a mouse click or a keypress occurs, Fireball dispatches an event object
-		into the event flow from the root of the hierarchy. The event object then makes its way through
-		the scene graph until it reaches the event target, at which point it begins its return trip through
-		the scene graph. This round-trip journey to the event target is conceptually divided into three phases:
-		- The capture phase comprises the journey from the root to the last node before the event target's node
-		- The target phase comprises only the event target node
-		- The bubbling phase comprises any subsequent nodes encountered on the return trip to the root of the tree
-		See also: http://www.w3.org/TR/DOM-Level-3-Events/#event-flow
-		
-		Event targets can implement the following methods:
-		 - _getCapturingTargets
-		 - _getBubblingTargets
-		
+		Immediately perform the widget alignment. You need to manually call this method only if
+		you need to get the latest results after the alignment before the end of current frame.
 		!#zh
-		事件目标是事件触发时，分派的事件对象，Node 是最常见的事件目标，
-		但是其他对象也可以是事件目标。<br/> */
-		export class EventTarget {		
-		/** !#en
-		Register an callback of a specific event type on the EventTarget.
-		This method is merely an alias to addEventListener.
-		!#zh
-		注册事件目标的特定事件类型回调，仅仅是 addEventListener 的别名。
-		@param type A string representing the event type to listen for.
-		@param callback The callback that will be invoked when the event is dispatched.
-		                             The callback is ignored if it is a duplicate (the callbacks are unique).
-		@param target The target to invoke the callback, can be null
-		@param useCapture When set to true, the capture argument prevents callback
-		                             from being invoked when the event's eventPhase attribute value is BUBBLING_PHASE.
-		                             When false, callback will NOT be invoked when event's eventPhase attribute value is CAPTURING_PHASE.
-		                             Either way, callback will be invoked when event's eventPhase attribute value is AT_TARGET.
+		立刻执行 widget 对齐操作。这个接口一般不需要手工调用。
+		只有当你需要在当前帧结束前获得 widget 对齐后的最新结果时才需要手动调用这个方法。
 		
 		@example 
 		```js
-		node.on(cc.Node.EventType.TOUCH_END, function (event) {
-		    cc.log("this is callback");
-		}, node);
+		widget.top = 10;       // change top margin
+		cc.log(widget.node.y); // not yet changed
+		widget.updateAlignment();
+		cc.log(widget.node.y); // changed
 		``` 
 		*/
-		on(type : string, callback: (param: Event) => void, target : any, useCapture : boolean) : Function;		
-		/** !#en
-		Removes the callback previously registered with the same type, callback, target and or useCapture.
-		This method is merely an alias to removeEventListener.
-		!#zh
-		删除之前与同类型，回调，目标或 useCapture 注册的回调，仅仅是 removeEventListener 的别名。
-		@param type A string representing the event type being removed.
-		@param callback The callback to remove.
-		@param target The target to invoke the callback, if it's not given, only callback without target will be removed
-		@param useCapture Specifies whether the callback being removed was registered as a capturing callback or not.
-		                             If not specified, useCapture defaults to false. If a callback was registered twice,
-		                             one with capture and one without, each must be removed separately. Removal of a capturing callback
-		                             does not affect a non-capturing version of the same listener, and vice versa.
-		
-		@example 
-		```js
-		// register touchEnd eventListener
-		var touchEnd = node.on(cc.Node.EventType.TOUCH_END, function (event) {
-		    cc.log("this is callback");
-		}, node);
-		// remove touchEnd eventListener
-		node.off(cc.Node.EventType.TOUCH_END, touchEnd, node);
-		``` 
-		*/
-		off(type : string, callback : Function, target : any, useCapture : boolean) : void;		
-		/** !#en Removes all callbacks previously registered with the same target.
-		!#zh 删除指定目标上的所有注册回调。
-		@param target The target to be searched for all related callbacks 
-		*/
-		targetOff(target : any) : void;		
-		/** !#en
-		Register an callback of a specific event type on the EventTarget,
-		the callback will remove itself after the first time it is triggered.
-		!#zh
-		注册事件目标的特定事件类型回调，回调会在第一时间被触发后删除自身。
-		@param type A string representing the event type to listen for.
-		@param callback The callback that will be invoked when the event is dispatched.
-		                             The callback is ignored if it is a duplicate (the callbacks are unique).
-		@param target The target to invoke the callback, can be null
-		@param useCapture When set to true, the capture argument prevents callback
-		                             from being invoked when the event's eventPhase attribute value is BUBBLING_PHASE.
-		                             When false, callback will NOT be invoked when event's eventPhase attribute value is CAPTURING_PHASE.
-		                             Either way, callback will be invoked when event's eventPhase attribute value is AT_TARGET.
-		
-		@example 
-		```js
-		node.once(cc.Node.EventType.TOUCH_END, function (event) {
-		    cc.log("this is callback");
-		}, node);
-		``` 
-		*/
-		once(type : string, callback: (param: Event) => void, target : any, useCapture : boolean) : void;		
-		/** !#en
-		Dispatches an event into the event flow.
-		The event target is the EventTarget object upon which the dispatchEvent() method is called.
-		!#zh 分发事件到事件流中。
-		@param event The Event object that is dispatched into the event flow 
-		*/
-		dispatchEvent(event : Event) : void;		
-		/** !#en
-		Send an event to this object directly, this method will not propagate the event to any other objects.
-		The event will be created from the supplied message, you can get the "detail" argument from event.detail.
-		!#zh
-		该对象直接发送事件， 这种方法不会对事件传播到任何其他对象。
-		@param message the message to send
-		@param detail whatever argument the message needs 
-		*/
-		emit(message : string, detail? : any) : void;	
-	}		
-		/** !#en Base class of all kinds of events.
-		!#zh 包含事件相关信息的对象。 */
-		export class Event {		
-		/** 
-		@param type The name of the event (case-sensitive), e.g. "click", "fire", or "submit"
-		@param bubbles A boolean indicating whether the event bubbles up through the tree or not 
-		*/
-		Event(type : string, bubbles : boolean) : Event;		
-		/** !#en The name of the event (case-sensitive), e.g. "click", "fire", or "submit".
-		!#zh 事件类型。 */
-		type : string;		
-		/** !#en Indicate whether the event bubbles up through the tree or not.
-		!#zh 表示该事件是否进行冒泡。 */
-		bubbles : boolean;		
-		/** !#en A reference to the target to which the event was originally dispatched.
-		!#zh 最初事件触发的目标 */
-		target : any;		
-		/** !#en A reference to the currently registered target for the event.
-		!#zh 当前目标 */
-		currentTarget : any;		
-		/** !#en
-		Indicates which phase of the event flow is currently being evaluated.
-		Returns an integer value represented by 4 constants:
-		 - Event.NONE = 0
-		 - Event.CAPTURING_PHASE = 1
-		 - Event.AT_TARGET = 2
-		 - Event.BUBBLING_PHASE = 3
-		The phases are explained in the [section 3.1, Event dispatch and DOM event flow]
-		(http://www.w3.org/TR/DOM-Level-3-Events/#event-flow), of the DOM Level 3 Events specification.
-		!#zh 事件阶段 */
-		eventPhase : number;		
-		/** !#en Reset the event for being stored in the object pool.
-		!#zh 重置对象池中存储的事件。 
-		*/
-		unuse() : string;		
-		/** !#en Reuse the event for being used again by the object pool.
-		!#zh 用于对象池再次使用的事件。 
-		*/
-		reuse() : string;		
-		/** !#en Stops propagation for current event.
-		!#zh 停止传递当前事件。 
-		*/
-		stopPropagation() : void;		
-		/** !#en Stops propagation for current event immediately,
-		the event won't even be dispatched to the listeners attached in the current target.
-		!#zh 立即停止当前事件的传递，事件甚至不会被分派到所连接的当前目标。 
-		*/
-		stopPropagationImmediate() : void;		
-		/** !#en Checks whether the event has been stopped.
-		!#zh 检查该事件是否已经停止传递. 
-		*/
-		isStopped() : boolean;		
-		/** !#en
-		<p>
-		    Gets current target of the event                                                            <br/>
-		    note: It only be available when the event listener is associated with node.                <br/>
-		         It returns 0 when the listener is associated with fixed priority.
-		</p>
-		!#zh 获取当前目标节点 
-		*/
-		getCurrentTarget() : Node;		
-		/** !#en Gets the event type.
-		!#zh 获取事件类型 
-		*/
-		getType() : string;		
-		/** !#en Code for event without type.
-		!#zh 没有类型的事件 */
-		NO_TYPE : string;		
-		/** !#en Events not currently dispatched are in this phase
-		!#zh 尚未派发事件阶段 */
-		NONE : number;		
-		/** !#en
-		The capturing phase comprises the journey from the root to the last node before the event target's node
-		see http://www.w3.org/TR/DOM-Level-3-Events/#event-flow
-		!#zh 捕获阶段，包括事件目标节点之前从根节点到最后一个节点的过程。 */
-		CAPTURING_PHASE : number;		
-		/** !#en
-		The target phase comprises only the event target node
-		see http://www.w3.org/TR/DOM-Level-3-Events/#event-flow
-		!#zh 目标阶段仅包括事件目标节点。 */
-		AT_TARGET : number;		
-		/** !#en
-		The bubbling phase comprises any subsequent nodes encountered on the return trip to the root of the hierarchy
-		see http://www.w3.org/TR/DOM-Level-3-Events/#event-flow
-		!#zh 冒泡阶段， 包括回程遇到到层次根节点的任何后续节点。 */
-		BUBBLING_PHASE : number;	
+		updateAlignment() : void;	
 	}		
 		/** !#en
 		<p>
@@ -6792,7 +6874,7 @@ declare module cc {
 		    cc.log('Should load a texture from external url: ' + (tex instanceof cc.Texture2D));
 		});
 		
-		cc.loader.load({id: 'http://example.com/getImageREST?file=a.png', type: 'png'}, function (err, tex) {
+		cc.loader.load({url: 'http://example.com/getImageREST?file=a.png', type: 'png'}, function (err, tex) {
 		    cc.log('Should load a texture from RESTful API by specify the type: ' + (tex instanceof cc.Texture2D));
 		});
 		
@@ -6849,7 +6931,7 @@ declare module cc {
 		@example 
 		```js
 		// load the texture (resources/imgs/cocos.png) and the corresponding sprite frame
-		cc.loader.loadResAll('imgs/cocos', function (err, assets) {
+		cc.loader.loadResDir('imgs/cocos', function (err, assets) {
 		    if (err) {
 		        cc.error(err);
 		        return;
@@ -6859,7 +6941,7 @@ declare module cc {
 		});
 		
 		// load all textures in "resources/imgs/"
-		cc.loader.loadResAll('imgs', cc.Texture2D, function (err, textures) {
+		cc.loader.loadResDir('imgs', cc.Texture2D, function (err, textures) {
 		    if (err) {
 		        cc.error(err);
 		        return;
@@ -6869,13 +6951,14 @@ declare module cc {
 		});
 		``` 
 		*/
-		loadResAll(url : string, type? : Function, completeCallback: (error: Error, assets: any[]) => void) : void;		
+		loadResDir(url : string, type? : Function, completeCallback: (error: Error, assets: any[]) => void) : void;		
 		/** Get resource data by id. <br>
 		When you load resources with {{#crossLink "loader/load:method"}}{{/crossLink}} or {{#crossLink "loader/loadRes:method"}}{{/crossLink}},
 		the url will be the unique identity of the resource.
-		After loaded, you can acquire them by passing the url to this API. 
+		After loaded, you can acquire them by passing the url to this API.
+		@param type Only asset of type will be returned if this argument is supplied. 
 		*/
-		getRes(url : string) : any;		
+		getRes(url : string, type? : Function) : any;		
 		/** !#en
 		Release the content of an asset or an array of assets by uuid.
 		Start from v1.3, this method will not only remove the cache of the asset in loader, but also clean up its content.
@@ -6887,7 +6970,7 @@ declare module cc {
 		通过 id（通常是资源 url）来释放一个资源或者一个资源数组。
 		从 v1.3 开始，这个方法不仅会从 loader 中删除资源的缓存引用，还会清理它的资源内容。
 		比如说，当你释放一个 texture 资源，这个 texture 和它的 gl 贴图数据都会被释放。
-		在复杂项目中，我们建议你结合 {{#crossLink "loader/getDependsRecursively:method"}}{{/crossLink}} 来使用，便于在设备内存告急的情况下更快得释放不再需要的资源的内存。
+		在复杂项目中，我们建议你结合 {{#crossLink "loader/getDependsRecursively:method"}}{{/crossLink}} 来使用，便于在设备内存告急的情况下更快地释放不再需要的资源的内存。
 		注意，这个函数可能会导致资源贴图或资源所依赖的贴图不可用，如果场景中存在节点仍然依赖同样的贴图，它们可能会变黑并报 GL 错误。
 		如果你只想删除一个资源的缓存引用，请使用 {{#crossLink "pipeline/removeItem:method"}}{{/crossLink}}
 		
@@ -6916,9 +6999,15 @@ declare module cc {
 		*/
 		releaseAsset(asset : Asset) : void;		
 		/** !#en Release the asset loaded by {{#crossLink "loader/loadRes:method"}}{{/crossLink}}. Refer to {{#crossLink "loader/release:method"}}{{/crossLink}} for detailed informations.
-		!#zh 释放通过 {{#crossLink "loader/loadRes:method"}}{{/crossLink}} 加载的资源。详细信息请参考 {{#crossLink "loader/release:method"}}{{/crossLink}} 
+		!#zh 释放通过 {{#crossLink "loader/loadRes:method"}}{{/crossLink}} 加载的资源。详细信息请参考 {{#crossLink "loader/release:method"}}{{/crossLink}}
+		@param type Only asset of type will be released if this argument is supplied. 
 		*/
-		releaseRes(url : string) : void;		
+		releaseRes(url : string, type? : Function) : void;		
+		/** !#en Release the all assets loaded by {{#crossLink "loader/loadResDir:method"}}{{/crossLink}}. Refer to {{#crossLink "loader/release:method"}}{{/crossLink}} for detailed informations.
+		!#zh 释放通过 {{#crossLink "loader/loadResDir:method"}}{{/crossLink}} 加载的资源。详细信息请参考 {{#crossLink "loader/release:method"}}{{/crossLink}}
+		@param type Only asset of type will be released if this argument is supplied. 
+		*/
+		releaseResDir(url : string, type? : Function) : void;		
 		/** !#en Resource all assets. Refer to {{#crossLink "loader/release:method"}}{{/crossLink}} for detailed informations.
 		!#zh 释放所有资源。详细信息请参考 {{#crossLink "loader/release:method"}}{{/crossLink}} 
 		*/
@@ -6927,7 +7016,7 @@ declare module cc {
 		Indicates whether to release the asset when loading a new scene.<br>
 		By default, when loading a new scene, all assets in the previous scene will be released or preserved
 		according to whether the previous scene checked the "Auto Release Assets" option.
-		On the other hand, assets dynamically loaded by using `cc.loader.loadRes` or `cc.loader.loadResAll`
+		On the other hand, assets dynamically loaded by using `cc.loader.loadRes` or `cc.loader.loadResDir`
 		will not be affected by that option, remain not released by default.<br>
 		Use this API to change the default behavior on a single asset, to force preserve or release specified asset when scene switching.<br>
 		<br>
@@ -6935,7 +7024,7 @@ declare module cc {
 		!#zh
 		设置当场景切换时是否自动释放资源。<br>
 		默认情况下，当加载新场景时，旧场景的资源根据旧场景是否勾选“Auto Release Assets”，将会被释放或者保留。
-		而使用 `cc.loader.loadRes` 或 `cc.loader.loadResAll` 动态加载的资源，则不受场景设置的影响，默认不自动释放。<br>
+		而使用 `cc.loader.loadRes` 或 `cc.loader.loadResDir` 动态加载的资源，则不受场景设置的影响，默认不自动释放。<br>
 		使用这个 API 可以在单个资源上改变这个默认行为，强制在切换场景时保留或者释放指定资源。<br>
 		<br>
 		参考：{{#crossLink "loader/setAutoReleaseRecursively:method"}}cc.loader.setAutoReleaseRecursively{{/crossLink}}，{{#crossLink "loader/isAutoRelease:method"}}cc.loader.isAutoRelease{{/crossLink}}
@@ -6957,7 +7046,7 @@ declare module cc {
 		Indicates whether to release the asset and its referenced other assets when loading a new scene.<br>
 		By default, when loading a new scene, all assets in the previous scene will be released or preserved
 		according to whether the previous scene checked the "Auto Release Assets" option.
-		On the other hand, assets dynamically loaded by using `cc.loader.loadRes` or `cc.loader.loadResAll`
+		On the other hand, assets dynamically loaded by using `cc.loader.loadRes` or `cc.loader.loadResDir`
 		will not be affected by that option, remain not released by default.<br>
 		Use this API to change the default behavior on the specified asset and its recursively referenced assets, to force preserve or release specified asset when scene switching.<br>
 		<br>
@@ -6965,7 +7054,7 @@ declare module cc {
 		!#zh
 		设置当场景切换时是否自动释放资源及资源引用的其它资源。<br>
 		默认情况下，当加载新场景时，旧场景的资源根据旧场景是否勾选“Auto Release Assets”，将会被释放或者保留。
-		而使用 `cc.loader.loadRes` 或 `cc.loader.loadResAll` 动态加载的资源，则不受场景设置的影响，默认不自动释放。<br>
+		而使用 `cc.loader.loadRes` 或 `cc.loader.loadResDir` 动态加载的资源，则不受场景设置的影响，默认不自动释放。<br>
 		使用这个 API 可以在指定资源及资源递归引用到的所有资源上改变这个默认行为，强制在切换场景时保留或者释放指定资源。<br>
 		<br>
 		参考：{{#crossLink "loader/setAutoRelease:method"}}cc.loader.setAutoRelease{{/crossLink}}，{{#crossLink "loader/isAutoRelease:method"}}cc.loader.isAutoRelease{{/crossLink}}
@@ -7178,9 +7267,9 @@ declare module cc {
 		removeAllListeners(key : string|any) : void;		
 		/** !#en Complete an item in the LoadingItems queue, please do not call this method unless you know what's happening.
 		!#zh 通知 LoadingItems 队列一个 item 对象已完成，请不要调用这个函数，除非你知道自己在做什么。
-		@param item The item id 
+		@param id The item url 
 		*/
-		itemComplete(item : string) : void;		
+		itemComplete(id : string) : void;		
 		/** !#en Destroy the LoadingItems queue, the queue object won't be garbage collected, it will be recycled, so every after destroy is not reliable.
 		!#zh 销毁一个 LoadingItems 队列，这个队列对象会被内部缓冲池回收，所以销毁后的所有内部信息都是不可依赖的。 
 		*/
@@ -7316,11 +7405,11 @@ declare module cc {
 		@param id The id of the item 
 		*/
 		getItem(id : any) : any;		
-		/** !#en Removes an item in pipeline, no matter it's in progress or completed.
+		/** !#en Removes an completed item in pipeline.
 		It will only remove the cache in the pipeline or loader, its dependencies won't be released.
 		cc.loader provided another method to completely cleanup the resource and its dependencies,
 		please refer to {{#crossLink "loader/release:method"}}cc.loader.release{{/crossLink}}
-		!#zh 移除指定 item，无论是进行时还是已完成。
+		!#zh 移除指定的已完成 item。
 		这将仅仅从 pipeline 或者 loader 中删除其缓存，并不会释放它所依赖的资源。
 		cc.loader 中提供了另一种删除资源及其依赖的清理方法，请参考 {{#crossLink "loader/release:method"}}cc.loader.release{{/crossLink}}
 		@param id The id of the item 
@@ -7590,6 +7679,7 @@ declare module cc {
 		OPTIMIZE_BLEND_FUNC_FOR_PREMULTIPLIED_ALPHA = 0,
 		TEXTURE_ATLAS_USE_TRIANGLE_STRIP = 0,
 		TEXTURE_ATLAS_USE_VAO = 0,
+		TEXTURE_NPOT_SUPPORT = 0,
 		USE_LA88_LABELS = 0,
 		SPRITE_DEBUG_DRAW = 0,
 		LABELBMFONT_DEBUG_DRAW = 0,
@@ -7597,16 +7687,8 @@ declare module cc {
 		ENABLE_STACKABLE_ACTIONS = 0,
 		ENABLE_GL_STATE_CACHE = 0,
 		TOUCH_TIMEOUT = 0,
-		BLEND_SRC = 0,
-		lerp = 0,
-		rand = 0,
-		randomMinus1To1 = 0,
-		random0To1 = 0,
-		degreesToRadians = 0,
-		radiansToDegrees = 0,
-		nodeDrawSetup = 0,
-		incrementGLDraws = 0,
-		checkGLErrorDebug = 0,	
+		BATCH_VERTEX_COUNT = 0,
+		ENABLE_GC_FOR_NATIVE_OBJECTS = 0,	
 	}		
 		/** The base class of most of all the objects in Fireball. */
 		export class Object {		
@@ -9403,7 +9485,11 @@ declare module cc {
 		/** !#en Get the invert transform of an AffineTransform object.
 		!#zh 求逆矩阵。 
 		*/
-		affineTransformInvert(t : AffineTransform) : AffineTransform;	
+		affineTransformInvert(t : AffineTransform) : AffineTransform;		
+		/** !#en Put the invert transform of an AffineTransform object into the out AffineTransform object.
+		!#zh 求逆矩阵并存入用户传入的矩阵对象参数。 
+		*/
+		affineTransformInvert(t : AffineTransform, out : AffineTransform) : void;	
 	}		
 		/** !#en
 		Representation of RGBA colors.
@@ -9512,7 +9598,11 @@ declare module cc {
 		``` 
 		*/
 		toString() : string;		
-		/** !#en TODO
+		/** !#en Gets red channel value
+		!#zh 获取当前颜色的红色值。 
+		*/
+		getR() : number;		
+		/** !#en Sets red value and return the current color object
 		!#zh 设置当前的红色值，并返回当前对象。
 		@param red the new Red component.
 		
@@ -9523,7 +9613,11 @@ declare module cc {
 		``` 
 		*/
 		setR(red : number) : Color;		
-		/** !#en TODO
+		/** !#en Gets green channel value
+		!#zh 获取当前颜色的绿色值。 
+		*/
+		getG() : number;		
+		/** !#en Sets green value and return the current color object
 		!#zh 设置当前的绿色值，并返回当前对象。
 		@param green the new Green component.
 		
@@ -9534,7 +9628,11 @@ declare module cc {
 		``` 
 		*/
 		setG(green : number) : Color;		
-		/** !#en TODO
+		/** !#en Gets blue channel value
+		!#zh 获取当前颜色的蓝色值。 
+		*/
+		getB() : number;		
+		/** !#en Sets blue value and return the current color object
 		!#zh 设置当前的蓝色值，并返回当前对象。
 		@param blue the new Blue component.
 		
@@ -9545,7 +9643,11 @@ declare module cc {
 		``` 
 		*/
 		setB(blue : number) : Color;		
-		/** !#en TODO
+		/** !#en Gets alpha channel value
+		!#zh 获取当前颜色的透明度值。 
+		*/
+		getA() : number;		
+		/** !#en Sets alpha value and return the current color object
 		!#zh 设置当前的透明度，并返回当前对象。
 		@param alpha the new Alpha component.
 		
@@ -9556,7 +9658,7 @@ declare module cc {
 		``` 
 		*/
 		setA(alpha : number) : Color;		
-		/** !#en TODO
+		/** !#en Convert color to css format.
 		!#zh 转换为 CSS 格式。
 		@param opt "rgba", "rgb", "#rgb" or "#rrggbb".
 		
@@ -9582,8 +9684,8 @@ declare module cc {
 		``` 
 		*/
 		clamp() : void;		
-		/** !#en TODO
-		!#zh 读取 16 进制。
+		/** !#en Read hex string and store color data into the current color object, the hex string must be formated as rgba or rgb.
+		!#zh 读取 16 进制颜色。
 		
 		@example 
 		```js
@@ -10481,6 +10583,37 @@ declare module cc {
 	}	
 	
 	/****************************************************
+	* Event
+	*****************************************************/
+	
+	export module Event {			
+			/** !#en The Custom event
+			!#zh 自定义事件 */
+			export class EventCustom extends Event {			
+			/** 
+			@param type The name of the event (case-sensitive), e.g. "click", "fire", or "submit"
+			@param bubbles A boolean indicating whether the event bubbles up through the tree or not 
+			*/
+			EventCustom(type : string, bubbles : boolean) : EventCustom;			
+			/** !#en A reference to the detailed data of the event
+			!#zh 事件的详细数据 */
+			detail : any;			
+			/** !#en Sets user data
+			!#zh 设置用户数据 
+			*/
+			setUserData(data : any) : void;			
+			/** !#en Gets user data
+			!#zh 获取用户数据 
+			*/
+			getUserData() : any;			
+			/** !#en Gets event name
+			!#zh 获取事件名称 
+			*/
+			getEventName() : string;		
+		}	
+	}	
+	
+	/****************************************************
 	* Button
 	*****************************************************/
 	
@@ -10927,37 +11060,6 @@ declare module cc {
 			LOADED = 0,
 			LOADING = 0,
 			ERROR = 0,		
-		}	
-	}	
-	
-	/****************************************************
-	* Event
-	*****************************************************/
-	
-	export module Event {			
-			/** !#en The Custom event
-			!#zh 自定义事件 */
-			export class EventCustom extends Event {			
-			/** 
-			@param type The name of the event (case-sensitive), e.g. "click", "fire", or "submit"
-			@param bubbles A boolean indicating whether the event bubbles up through the tree or not 
-			*/
-			EventCustom(type : string, bubbles : boolean) : EventCustom;			
-			/** !#en A reference to the detailed data of the event
-			!#zh 事件的详细数据 */
-			detail : any;			
-			/** !#en Sets user data
-			!#zh 设置用户数据 
-			*/
-			setUserData(data : any) : void;			
-			/** !#en Gets user data
-			!#zh 获取用户数据 
-			*/
-			getUserData() : any;			
-			/** !#en Gets event name
-			!#zh 获取事件名称 
-			*/
-			getEventName() : string;		
 		}	
 	}	
 	
@@ -12368,7 +12470,7 @@ declare module anysdk {
 		AD_TYPE_FULLSCREEN = 0,
 		AD_TYPE_MOREAPP = 0,
 		AD_TYPE_OFFERWALL = 0,
-		AD_TYPE_REWARDEDVIDEOc = 0,
+		AD_TYPE_REWARDEDVIDEO = 0,
 		AD_TYPE_NATIVEEXPRESS = 0,
 		AD_TYPE_NATIVEADVANCED = 0,	
 	}	
@@ -12582,6 +12684,10 @@ declare module sp {
 		返回一个 {{#crossLinkModule "sp.spine"}}sp.spine{{/crossLinkModule}}.TrackEntry 对象。 
 		*/
 		addAnimation(trackIndex : number, name : string, loop : boolean, delay? : number) : sp.spine.TrackEntry;		
+		/** !#en Find animation with specified name.
+		!#zh 查找指定名称的动画 
+		*/
+		findAnimation(name : string) : sp.spine.Animation;		
 		/** !#en Returns track entry by trackIndex.<br>
 		Returns a {{#crossLinkModule "sp.spine"}}sp.spine{{/crossLinkModule}}.TrackEntry object.
 		!#zh 通过 track 索引获取 TrackEntry。<br>
@@ -12600,10 +12706,50 @@ declare module sp {
 		!#zh 用来设置开始播放动画的事件监听。 
 		*/
 		setStartListener(listener : Function) : void;		
+		/** !#en Set the interrupt event listener.
+		!#zh 用来设置动画被打断的事件监听。 
+		*/
+		setInterruptListener(listener : Function) : void;		
 		/** !#en Set the end event listener.
 		!#zh 用来设置动画播放完后的事件监听。 
 		*/
-		setEndListener(listener : Function) : void;	
+		setEndListener(listener : Function) : void;		
+		/** !#en Set the dispose event listener.
+		!#zh 用来设置动画将被销毁的事件监听。 
+		*/
+		setDisposeListener(listener : Function) : void;		
+		/** !#en Set the complete event listener.
+		!#zh 用来设置动画播放一次循环结束后的事件监听。 
+		*/
+		setCompleteListener(listener : Function) : void;		
+		/** !#en Set the animation event listener.
+		!#zh 用来设置动画播放过程中帧事件的监听。 
+		*/
+		setEventListener(listener : Function) : void;		
+		/** !#en Set the start event listener for specified TrackEntry (only supported on Web).
+		!#zh 用来为指定的 TrackEntry 设置动画开始播放的事件监听。（只支持 Web 平台） 
+		*/
+		setTrackStartListener(entry : sp.spine.TrackEntry, listener : Function) : void;		
+		/** !#en Set the interrupt event listener for specified TrackEntry (only supported on Web).
+		!#zh 用来为指定的 TrackEntry 设置动画被打断的事件监听。（只支持 Web 平台） 
+		*/
+		setTrackInterruptListener(entry : sp.spine.TrackEntry, listener : Function) : void;		
+		/** !#en Set the end event listener for specified TrackEntry (only supported on Web).
+		!#zh 用来为指定的 TrackEntry 设置动画播放结束的事件监听。（只支持 Web 平台） 
+		*/
+		setTrackEndListener(entry : sp.spine.TrackEntry, listener : Function) : void;		
+		/** !#en Set the dispose event listener for specified TrackEntry (only supported on Web).
+		!#zh 用来为指定的 TrackEntry 设置动画即将被销毁的事件监听。（只支持 Web 平台） 
+		*/
+		setTrackDisposeListener(entry : sp.spine.TrackEntry, listener : Function) : void;		
+		/** !#en Set the complete event listener for specified TrackEntry (only supported on Web).
+		!#zh 用来为指定的 TrackEntry 设置动画一次循环播放结束的事件监听。（只支持 Web 平台） 
+		*/
+		setTrackCompleteListener(entry : sp.spine.TrackEntry, listener : Function) : void;		
+		/** !#en Set the event listener for specified TrackEntry (only supported on Web).
+		!#zh 用来为指定的 TrackEntry 设置动画帧事件的监听。（只支持 Web 平台） 
+		*/
+		setTrackEventListener(entry : sp.spine.TrackEntry, listener : Function) : void;	
 	}		
 		/** !#en The skeleton data of spine.
 		!#zh Spine 的 骨骼数据。 */
